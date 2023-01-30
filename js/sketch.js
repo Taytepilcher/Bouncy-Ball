@@ -3,8 +3,8 @@
 
 TODO: 
     1. Make object of ball, with x, y, size, rgb, name etc
-    2. improve the physics
-
+    2. add more ball objects, and add collision with those
+    3. allow balls to spawn at cursor
 
 */
 
@@ -15,71 +15,52 @@ let canvasHeight = 900
 
 
 var ballSize = 200;
+var ballRadius = ballSize/2;
 var ballCoordX = canvasWidth/2;
 var ballCoordY = canvasHeight/2;
 
+ 
 //needed for bouncing
-var ballMass = 20;       //mass
-var ballVelocity = 10;    //velocity 
-var ballAcceleration = 3;   //acceleration
-var ballElasticity = 0.9;//elasticity
-
-var ballPeakHeight = canvasHeight/2; 
-
-
-var collidedBottom = false;
-var collidedTop = false;
-var collidedLeft = false;
-var collidedRight = false;
-
+var gravity = 0.3;
+var elasticity = -0.9;
+var ballVelocityY = 5;
+var ballVelocityX = 10;
 
 
 function updateBall(){
+
       //find edges
       var bottomOfBall = (ballCoordY + (ballSize/2));
       var leftSideOfBall = (ballCoordX - (ballSize/2));
       var rightSideOfBall = (ballCoordX + (ballSize/2));
       var topOfBall = (ballCoordY - (ballSize/2));
 
-      /*
-      »»»DEALING WITH COLLISION«««
-        the ball falls in line with the force of gravity, 
-        which always points directly downward. On earth, 
-        this acceleration due to gravity is 9.8 m/s2 (g= 9.8 m/s2). 
-        This means, in essence, that for every second for falling, 
-        the ball's velocity will accelerate by 9.8 m/s.
-     */
-     
-     //if the ball is moving, and not just sitting at the bottom
-     if((ballPeakHeight < canvasHeight - (ballSize/2))){
-       //ball is falling
-        if(!collidedBottom){ 
-          
-          //acceleration due to gravity
-          ballCoordY = ballCoordY + (ballVelocity + 9.8); //move ball down with added effect of gravity
-          
-          //ball has hit the bottom
-          if(bottomOfBall >= canvasHeight){
-              collidedBottom = true;
-              ballVelocity -= ballElasticity; //ball loses velocity based on how elastic it is
-              ballVelocity = -ballVelocity;   //flip velocity so it bounces up
-              ballPeakHeight += ballElasticity * 30; //decrease the peak height, i think this is unnecesssary TODO   
-           }
 
-        
-        }//ball is coming up
-        else{
+      //apply gravity to y velocity of ball (always falling)
+      ballVelocityY += gravity;
 
-            if(ballCoordY <= ballPeakHeight){
-                collidedBottom = false;       //has hit the top, velocity needs to be flipped again
-                ballVelocity = -ballVelocity;
-            }
+      //update coordinates by the velocity, the velocity is
+      //how much it moves each frame
+      ballCoordY += ballVelocityY;
+      ballCoordX += ballVelocityX;
 
-            ballCoordY = ballCoordY + ballVelocity; //move ball up
-        }
-
+      //if we have a collision on the right side of the ball
+      if(rightSideOfBall > canvasWidth){
+        ballCoordX = canvasWidth - ballRadius;  //the centre of the ball is a radius distance away from the edge of the screen
+        ballVelocityX *= elasticity;            //it has collided so it needs to lose some speed
+      }else if(leftSideOfBall < 0){             //same again but if it hits the left side
+        ballCoordX = ballRadius;                
+        ballVelocityX *= elasticity;
       }
-      
+
+      //if we have a collision at the bottom of the ball
+      if(bottomOfBall > canvasHeight){         //do the same as with the x axis
+        ballCoordY = canvasHeight - ballRadius;
+        ballVelocityY *= elasticity; 
+      }else if(topOfBall < 0){                //and at the top
+        ballCoordY = ballRadius;
+        ballVelocityY *= elasticity;
+      }
 }
 
 //TODO: fill won't let me change these values on the fly to make it flash
@@ -91,7 +72,6 @@ function drawBall(){
     fill(red, green, blue);
     ellipse(ballCoordX, ballCoordY, ballSize);
 }
-
 
 
 //runs at start 
@@ -110,9 +90,13 @@ function setup() {
 }
 
 
-//main function, while(true)??
+
 function draw() {
     background(50);
+
+    
     updateBall();
     drawBall();
+    
+
 }

@@ -1,0 +1,15 @@
+
+add gravity to the ball's Y velocity
+
+update x and y coordinates for the ball
+
+check that the X coordinate plus it's radius isn't more than the 
+canvas width
+	if it is, set the coordinate to the canvas width minus radius
+	and then update the velocity by setting it to 90% of itself
+	based on elasticity properties (how bouncy it is)
+	
+
+check that the Y coordinate plus it's radius isn't more than the 
+canvas height
+	do the same as was done for the X coordinate
